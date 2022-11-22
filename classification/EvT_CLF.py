@@ -151,7 +151,7 @@ class EvT_CLF(nn.Module):
 
 
 
-    def forward(self, event_data):
+    def forward(self, event_data, init_memory=True):
         
         # Prepare data and get masks for empty tokens/time-steps
         tokens_events, pixels_events = event_data['event_frames']
@@ -171,7 +171,7 @@ class EvT_CLF(nn.Module):
         tokens_events = tokens_events_2
     
         # Erase memory from decoder latent vectors and initialize memory
-        self.cross_attention.init_forward_pass(B)
+        if init_memory: self.cross_attention.init_forward_pass(B)
 
         for num_time_step in range(T):
                                      

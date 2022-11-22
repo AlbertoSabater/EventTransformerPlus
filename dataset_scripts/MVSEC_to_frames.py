@@ -104,7 +104,6 @@ for num_iter, (_, depth, _) in enumerate(depth_gen):
     iter_events_inds = buffer_events[:,2] <= ts
     iter_events = buffer_events[iter_events_inds]
     buffer_events = buffer_events[~iter_events_inds]
-    assert iter_events[:,2].min() > prev_ts and iter_events[:,2].max() <= ts
     min_event_ts, max_event_ts = iter_events[:,2].min(), iter_events[:,2].max()
     diff_event_ts = ts - min_event_ts
     # Split events and generate representations. Create chunks_per_depth frames per depth map. time-window of ~50ms

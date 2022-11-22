@@ -222,8 +222,8 @@ class MVSEC_DataModule(LightningDataModule):
             self.min_dist = [2]
             self.max_dist = [80]
             # self.path_dataset = ['../datasets/MVSEC/processed_sequences/']
-            # self.path_dataset = ['../datasets/MVSEC/dataset_frames/']
-            self.path_dataset = ['../datasets/MVSEC/dataset_frames_fixed/']
+            self.path_dataset = ['../datasets/MVSEC/dataset_frames/']
+            # self.path_dataset = ['../datasets/MVSEC/dataset_frames_fixed/']
             # self.path_dataset = ['../datasets/MVSEC/dataset_frames_real_TORE/']
         else: raise ValueError(f'Dataset [{self.dataset_name}] not handled')
 

@@ -43,11 +43,7 @@ def mean_error(y_input, y_target):
 
 def scale_invariant_loss(y_input, y_target, weight = 1.0, n_lambda = 0.5):
     log_diff = y_input - y_target
-    assert not log_diff.isnan().any() and not log_diff.isinf().any()
-    assert not torch.isinf(((log_diff**2).mean()))
-    assert not torch.isinf(n_lambda*(log_diff.mean())**2)
     v =  weight * ((log_diff**2).mean()-(n_lambda*(log_diff.mean())**2))
-    assert not torch.isinf(v)
     return v
 
 class MultiScaleGradient(torch.nn.Module):
