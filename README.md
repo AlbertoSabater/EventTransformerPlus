@@ -49,9 +49,8 @@ pip install -r requirements.txt
 
 ### PRETRAINED MODELS
 
-```diff
-- TODO
-```
+Trained models hyperparameters and checkpoints are located in `./trained_models/`.
+
 
 ### DATA DOWNLOAD AND PRE-PROCESSING
 
