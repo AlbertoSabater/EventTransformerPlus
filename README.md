@@ -62,14 +62,14 @@ This transformation can be performed with the files located under `./dataset_scr
 
 ### EvT EVALUATION
 
-The evaluation of our pretrained models can be performed with the files: `./classification/evaluate_clf_model.py`, `./dense_estimation/evaluate_dense_model.py`, and `./dense_estimation/evaluate_dense_model.py`.
+The evaluation of our pretrained models can be performed with the files: `./classification/evaluate_clf_model.py`, `./dense_estimation/evaluate_dense_model.py`, and `./dense_evimo_2/evaluate_evimo_model.py`.
 At the beginning of the file, you can select the pretrained model to evaluate, the device where to evaluate it (CPU or GPU), and the kind of evaluation to perform (_performance_, _efficiency_, or model _complexity_).
 
 
 
 ### EvT TRAINING
 
-The training of a new model can be performed with the files: `./classification/trainer.py`, `./dense_estimation/trainer.py`, and `./dense_estimation/trainer.py`.
+The training of a new model can be performed with the files: `./classification/trainer.py`, `./dense_estimation/trainer.py`, and `./dense_evimo_2/trainer.py`.
 At the beginning of the file, you can select the pretraining model from where to copy its training hyper-parameters.
 Note that, since the involved datasets do not contain many training samples and there is data augmentation involved in the training, the final results might not be exactly equal to the ones reported in the article. If so, please perform several training executions.
 
