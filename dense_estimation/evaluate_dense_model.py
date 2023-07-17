@@ -11,6 +11,7 @@ from tqdm import tqdm
 import time
 import numpy as np
 from ptflops import get_model_complexity_info
+import os
 
 import copy
 
@@ -24,7 +25,7 @@ def load_model_evaluation_hparams(path_model):
     all_params['data_params']['sample_repetitions'] = 1               # Do not repeat the loaded sequences
     all_params['data_params']['skip_val_samples'] = 1               # Do not skip the loaded sequences
     all_params['data_params']['num_workers'] = 8
-    all_params['data_params']['pin_memory'] = False
+    all_params['data_params']['pin_memory'] = True
     return all_params
 
 dists = [10, 20, 30]
@@ -33,13 +34,16 @@ seq_info = {'D1': 0, 'N1': 1, 'N2': 2, 'N3': 3}
 device = 'cuda'
 
 
+path_model = '../trained_models/dense_models/eve'
+# path_model = '../trained_models/dense_models/img_eve'
 
 
-# path_model = '../trained_models/dense_models/eve'
-path_model = '../trained_models/dense_models/img_eve'
 
 all_params = load_model_evaluation_hparams(path_model)
 data_params = all_params['data_params']
+
+from pathlib import Path
+
 
 
 """
@@ -53,6 +57,8 @@ evaluation_mode = 'performance'               # mean_error@d | Increase batch_si
 
 if evaluation_mode == 'performance':
     data_params['batch_size'] = 16 
+    # data_params['batch_size'] = 32 
+    # data_params['batch_size'] = 48
     stats = { seq: {f'mean_error_{d}':[]  for d in dists } for seq in seq_info.keys() }
 
     def print_stats(stats, seq=None):
@@ -134,9 +140,11 @@ for seq, seq_num in seq_info.items():
     #     path_weights = mode(w, key=lambda x: [ float(s[len(metric)+1:len(metric)+1+7]) for s in x.split('-') if s.startswith(metric) ][0])
     #     return os.path.join(path_model, 'weights',path_weights)
     # path_weights = get_best_weigths(path_model, f'{seq}_mean_error_20', 'min')
+    print(path_weights)
 
     model = DepthDecoder(**copy.deepcopy(all_params['model_params'])).to(device)
     state_dict = torch.load(path_weights)['state_dict']
+    state_dict = { k.replace('model.', ''):v for k,v in state_dict.items() }            # TODO: .
     model.load_state_dict(state_dict)
     model.eval()
 
@@ -174,18 +182,18 @@ for seq, seq_num in seq_info.items():
             
             if evaluation_mode == 'performance':
                 # Calculate stats
-                y = batch['depth']
-                non_nan_values = ~torch.isnan(y)
-                min_dist = data_params['abs_log_params']['min_dist'][0]
-                max_dist = data_params['abs_log_params']['max_dist'][0]
-                y = torch.clip(y, min_dist, max_dist)
-                pred = log_to_abs(pred_log, min_dist=min_dist, max_dist=max_dist)
-            
-                logs = {}
-                for d in dists:
-                    mask_d = (non_nan_values) & (y < d)
-                    stats[seq][f'mean_error_{d}'] += [ float(mean_error(pred[b][mask_d[b]], y[b][mask_d[b]]).cpu().detach().numpy()) for b in range(pred.shape[0]) ]
-                    
+                    y = batch['depth']
+                    non_nan_values = ~torch.isnan(y)
+                    min_dist = data_params['abs_log_params']['min_dist'][0]
+                    max_dist = data_params['abs_log_params']['max_dist'][0]
+                    y = torch.clip(y, min_dist, max_dist)
+                    pred = log_to_abs(pred_log, min_dist=min_dist, max_dist=max_dist)
+                
+                    logs = {}
+                    for d in dists:
+                        mask_d = (non_nan_values) & (y < d)
+                        stats[seq][f'mean_error_{d}'] += [ float(mean_error(pred[b][mask_d[b]], y[b][mask_d[b]]).cpu().detach().numpy()) for b in range(pred.shape[0]) ]
+                        
             if evaluation_mode == 'performance':
                 pred.to('cpu'); pred = None; del pred
                 y.to('cpu'); y = None; del y
@@ -224,6 +232,5 @@ print_stats(stats)
 print()
 print(path_model)
 print('  &  '.join([ ' & '.join([ f'{np.mean(stats[seq][f"mean_error_{d}"]):.2f}' for d in dists ]) for seq in seq_info.keys() ]))
-
-
+print(dm.path_dataset)
     

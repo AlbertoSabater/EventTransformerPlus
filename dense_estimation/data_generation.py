@@ -147,8 +147,8 @@ class MVSEC(Dataset):
         batch_samples = {'depth': depth, 'depth_ts': depth_ts}
         if self.use_events: 
             if event_frames.sum() == 0: 
-                raise ValueError('Empty event frame')
                 print('AAAAAAA', self.sequence, idx, side, event_frames.sum() == 0, images.sum() == 0)
+                raise ValueError('Empty event frame')
             batch_samples['event_frames'] = event_frames
             batch_samples['event_frames_ts'] = event_frames_ts
         if self.use_images: 
@@ -221,10 +221,7 @@ class MVSEC_DataModule(LightningDataModule):
         if self.dataset_name == 'MVSEC':
             self.min_dist = [2]
             self.max_dist = [80]
-            # self.path_dataset = ['../datasets/MVSEC/processed_sequences/']
-            self.path_dataset = ['../datasets/MVSEC/dataset_frames/']
-            # self.path_dataset = ['../datasets/MVSEC/dataset_frames_fixed/']
-            # self.path_dataset = ['../datasets/MVSEC/dataset_frames_real_TORE/']
+            self.path_dataset = [f'../datasets/MVSEC_final/0601_dataset_frames_k{data_params["k"]}_MT{data_params["MT"]//1000}_mT{50//data_params["k"]}_v0_clear/']
         else: raise ValueError(f'Dataset [{self.dataset_name}] not handled')
 
         
@@ -278,7 +275,8 @@ class MVSEC_DataModule(LightningDataModule):
             sequences = ['outdoor_day1', 
                           'outdoor_night1', 
                           'outdoor_night2', 
-                          'outdoor_night3']
+                          'outdoor_night3'
+                          ]
         else: raise ValueError('dataset_name [{self.dataste_name}] not handled')
         
         path_dataset = self.path_dataset[0]

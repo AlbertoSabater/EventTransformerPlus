@@ -2,7 +2,7 @@ import numpy as np
 
 
 # total_events -> [(x,y,t,p)]
-def process_event_stream(total_events, height, width, chunk_len_us, k, minTime, maxTime, pos_fifo=None, neg_fifo=None):
+def process_event_stream(total_events, height, width, chunk_len_us, k, minTime, maxTime, pos_fifo=None, neg_fifo=None, return_tw_ends=False):
     # Remove consecutive events -> make sure that events for a certain pixel are at least minTime away
     if minTime > 0: 
         total_events = total_events[::-1]   # Reverse to extract higher time-events -> unique sort later in increase order again
@@ -55,20 +55,23 @@ def process_event_stream(total_events, height, width, chunk_len_us, k, minTime, 
     if len(frames) == 0: return []
     frames = np.stack(frames)
     time_steps = np.array(time_steps)
+    
             
     # Make each window in the range (0, maxTime)
     diff = maxTime - time_steps
-    diff = diff[:,None,None,None,None]
+    diff = diff[:,None,None,None,None].astype('float32')
     frames = frames + diff           # Make newer events to have higher value than the older ones
     frames[frames < 0] = 0
-    frames = frames / maxTime             # Make newer events to have a value close to 1 and older ones a value close to 0
+    frames = (frames / maxTime).astype('float32')             # Make newer events to have a value close to 1 and older ones a value close to 0
     if return_mem: return (frames, min_max_values), (pos_fifo, neg_fifo)
-    else: return frames, min_max_values
+    else: 
+        if return_tw_ends: return frames, min_max_values, tw_ends
+        else: return frames, min_max_values
 
 
-def evetns_to_frame_v0(events, unique_coords_pos, unique_indexes_pos, height, width, k):
+def events_to_frame_v0(events, unique_coords_pos, unique_indexes_pos, height, width, k):
     # Initialize positive frame
-    new_pos = np.full((height, width, k), 0)      # Initialize frame representation
+    new_pos = np.full((height, width, k), 0, dtype=np.float32)      # Initialize frame representation
     if not len(unique_coords_pos) == 0: 
         agg_pos = np.split(events[:, 2], unique_indexes_pos[1:])
         # Get only the last k events for each coordinate
@@ -79,9 +82,9 @@ def evetns_to_frame_v0(events, unique_coords_pos, unique_indexes_pos, height, wi
     return new_pos
 
 # Create a frame representation of the given events
-def evetns_to_frame(events, unique_coords_pos, unique_indexes_pos, height, width, k):
+def events_to_frame(events, unique_coords_pos, unique_indexes_pos, height, width, k):
     # Initialize frame
-    new_pos = np.full((height * width * k), 0)      # Initialize frame representation
+    new_pos = np.full((height * width * k), 0, dtype=np.float32)      # Initialize frame representation
     if not len(unique_coords_pos) == 0: 
         true_inds, k_inds = [], []
         prev_ind = -1
@@ -97,7 +100,7 @@ def evetns_to_frame(events, unique_coords_pos, unique_indexes_pos, height, width
 
         events = events[true_inds]
         # Transform pixel and k array coordinates to ravel array position
-        true_coords = np.concatenate([events[:,[1,0]], k_inds[:,None]], axis=1, dtype=int)
+        true_coords = np.concatenate([events[:,[1,0]], k_inds[:,None]], axis=1, dtype='int32')
         true_coords_inds = np.ravel_multi_index(true_coords.transpose(), (height,width, k))
         
         # Add time-stamp information to the empty ravel frame
@@ -121,8 +124,8 @@ def get_representation(total_events, tw_events_inds, k, height, width):
     pos_events = pos_events[np.lexsort((pos_events[:,2], pos_events[:,1], pos_events[:,0]))]
     # Aggregate events per pixel. Get unique event coordinates -> avoid duplicates
     unique_coords_pos, unique_indexes_pos = np.unique(pos_events[:, :2], return_index=True, axis=0)
-    # new_pos = evetns_to_frame_v0(pos_events, unique_coords_pos, unique_indexes_pos, height, width, k)
-    new_pos = evetns_to_frame(pos_events, unique_coords_pos, unique_indexes_pos, height, width, k)
+    new_pos = events_to_frame_v0(pos_events, unique_coords_pos, unique_indexes_pos, height, width, k)
+    # new_pos = events_to_frame(pos_events, unique_coords_pos, unique_indexes_pos, height, width, k)
         
     # Select  events for the current time-window
     neg_inds = (tw_events_inds) & (total_events[:,3]==0)
@@ -131,8 +134,8 @@ def get_representation(total_events, tw_events_inds, k, height, width):
     neg_events = neg_events[np.lexsort((neg_events[:,2], neg_events[:,1], neg_events[:,0]))]
     # Aggregate events per pixel. Get unique event coordinates -> avoid duplicates
     unique_coords_neg, unique_indexes_neg = np.unique(neg_events[:, :2], return_index=True, axis=0)
-    # new_neg = evetns_to_frame_v0(neg_events, unique_coords_neg, unique_indexes_neg, height, width, k)
-    new_neg = evetns_to_frame(neg_events, unique_coords_neg, unique_indexes_neg, height, width, k)
+    new_neg = events_to_frame_v0(neg_events, unique_coords_neg, unique_indexes_neg, height, width, k)
+    # new_neg = events_to_frame(neg_events, unique_coords_neg, unique_indexes_neg, height, width, k)
     
 
     # More recent samples are close to zero 0

@@ -276,23 +276,15 @@ def train(folder_name, path_results, data_params, model_params,
 
 
 
+
 if __name__ == '__main__':
     
-    path_results = '../trained_models/'
-    num_iter = 0
-    while True:
+    path_results = '../trained_models/new/'
         
-        if num_iter % 2 == 0: 
-            reference_model = '../trained_models/dense_models/eve/'; folder_name = 'eve/'
-        else: 
-            reference_model = '../trained_models/dense_models/img_eve/'; folder_name = 'img_eve/'
-        train_params = json.load(open(reference_model + '/all_params.json', 'r'))
-        
-        train_params['data_params']['batch_size'] = 8
-        train_params['data_params']['num_workers'] = 4
-        
-        
-        train(folder_name, path_results, **train_params)
-        num_iter += 1
+    reference_model = '../trained_models/dense_models/eve/'; folder_name = 'eve/'
+    # reference_model = '../trained_models/dense_models/img_eve/'; folder_name = 'img_eve/'
+    train_params = json.load(open(reference_model + '/all_params.json', 'r'))
+    
+    train(folder_name, path_results, **train_params)
 
 
