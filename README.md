@@ -1,13 +1,10 @@
 # EventTransformer+
 
+[[Paper](https://arxiv.org/abs/2211.12222)]
+
 This repository contains the official code from __Event Transformer+. A multi-purpose solution for efficient event data processing__, a work based on _Event Transformer. A sparse-aware solution for efficient event data processing_.
 
 Event Transformer+ (EvT+) takes advantage of the event-data sparsity to increase its efficiency. EvT+ usses a new sparse patch-based event-data representation and a compact transformer architecture that naturally processes it. EvT+ shows high performnance on event-stream estimation, allowing it use with multi-modal data and requiring minimal computation resources, being able to work with minimal latency both in GPU and CPU. 
-
-```diff
-- TODO
-```
-[[Arxiv](TODO)]
 
 <p align="center"><img width="700" src="intro_clf.png"></p>
 <p align="center"><em>EvT+ for event-stream classification</em></p>
@@ -15,15 +12,14 @@ Event Transformer+ (EvT+) takes advantage of the event-data sparsity to increase
 <p align="center"><img width="700" src="intro_depth.png"></p>
 <p align="center"><em>EvT+ for dense estimation from event-stream + additional modality</em></p>
 
-#### Citation:
+### Citation:
 
-```diff
-- TODO
 ```
-```
-@InProceedings{Sabater_2023,
-    author    = {Sabater, Alberto and Montesano, Luis and Murillo, Ana C.},
-    title     = {Event Transformer+. A multi-purpose solution for efficient event data processing},
+@article{sabater2022event,
+  title={Event Transformer+. A multi-purpose solution for efficient event data processing},
+  author={Sabater, Alberto and Montesano, Luis and Murillo, Ana C},
+  journal={arXiv preprint arXiv:2211.12222},
+  year={2022}
 }
 
 @InProceedings{Sabater_2022_CVPR,
